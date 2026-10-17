@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="crate-token" content="__CRATE_TOKEN__">
+  <title>Crate Digger</title>
+  <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+  <link rel="stylesheet" href="/static/style.css?v=__VERSION__">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" id="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="15" class="brand-vinyl"/>
+        <circle cx="16" cy="16" r="10.5" class="brand-groove"/>
+        <circle cx="16" cy="16" r="6" class="brand-label"/>
+        <circle cx="16" cy="16" r="1.4" class="brand-hole"/>
+      </svg>
+      <span>Crate Digger</span>
+    </a>
+    <nav class="tabs" role="tablist" aria-label="Views">
+      <button class="tab" role="tab" id="tab-dig" aria-controls="view-dig" aria-selected="true" data-view="dig">Dig</button>
+      <button class="tab" role="tab" id="tab-crate" aria-controls="view-crate" aria-selected="false" data-view="crate">
+        Crate <span class="tab-count" id="crate-count">0</span>
+      </button>
+    </nav>
+    <div class="topbar-end">
+      <button class="pill" id="downloads-toggle" type="button" hidden aria-controls="downloads" aria-expanded="false">
+        <span class="pill-dot" aria-hidden="true"></span>
+        <svg class="icon pill-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10.5m0 0-4.2-4.2m4.2 4.2 4.2-4.2M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="downloads-label">Downloads</span>
+      </button>
+      <button class="icon-button" id="open-settings" type="button" aria-label="Settings" title="Settings">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.7 7.7 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.7 7.7 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.7 7.7 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.7 7.7 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.6Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="view" id="view-dig" role="tabpanel" aria-labelledby="tab-dig">
+      <form class="search" id="search-form" role="search">
+        <label class="search-field">
+          <svg class="icon search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="search-input" type="search" name="q" placeholder="Search tracks, artists or genres" autocomplete="off" spellcheck="false" aria-label="Search for music" maxlength="200">
+          <kbd class="key-hint" aria-hidden="true">/</kbd>
+        </label>
+        <button class="button primary search-button" type="submit">Dig</button>
+      </form>
+      <div class="search-options">
+        <div class="segmented" role="radiogroup" aria-label="Where to search" id="source-picker">
+          <button type="button" role="radio" aria-checked="true" data-source="all">Everywhere</button>
+          <button type="button" role="radio" aria-checked="false" data-source="youtube">YouTube</button>
+          <button type="button" role="radio" aria-checked="false" data-source="jamendo">Jamendo</button>
+          <button type="button" role="radio" aria-checked="false" data-source="archive" aria-label="Internet Archive"><span class="label-long">Internet Archive</span><span class="label-short">Archive</span></button>
+        </div>
+        <label class="check-inline" title="Only show YouTube videos their uploaders released under Creative Commons">
+          <input type="checkbox" id="cc-only"> Creative Commons videos only
+        </label>
+      </div>
+      <div id="results" class="results" aria-live="polite"></div>
+    </section>
+
+    <section class="view" id="view-crate" role="tabpanel" aria-labelledby="tab-crate" hidden>
+      <div class="crate-toolbar">
+        <label class="filter-field">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="crate-filter" type="search" placeholder="Filter by name, BPM (124) or key (8A)" aria-label="Filter your crate" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="match-chip" id="match-chip" hidden>
+          <span>Mixes with <strong id="match-name"></strong></span>
+          <button type="button" class="chip-close" id="match-clear" aria-label="Show all tracks">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="toolbar-actions">
+          <button class="button" id="copy-credits" type="button" title="Copy artist, title, license and link for the tracks shown">Copy credits</button>
+          <button class="button" id="rescan" type="button" title="Pick up files you added to the library folder yourself">Rescan folder</button>
+          <button class="button" id="open-folder" type="button">Open folder</button>
+        </div>
+      </div>
+      <div class="table-wrap" id="crate-wrap">
+        <table class="crate" id="crate-table">
+          <thead>
+            <tr>
+              <th class="col-play" scope="col"><span class="visually-hidden">Play</span></th>
+              <th class="col-track" scope="col" data-sort="title"><button type="button">Track</button></th>
+              <th class="col-bpm num" scope="col" data-sort="bpm"><button type="button">BPM</button></th>
+              <th class="col-key" scope="col" data-sort="camelot"><button type="button">Key</button></th>
+              <th class="col-time num" scope="col" data-sort="duration"><button type="button">Time</button></th>
+              <th class="col-genre" scope="col" data-sort="genre"><button type="button">Genre</button></th>
+              <th class="col-license" scope="col" data-sort="license"><button type="button">License</button></th>
+              <th class="col-added" scope="col" data-sort="added_at"><button type="button">Added</button></th>
+              <th class="col-menu" scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="crate-body"></tbody>
+        </table>
+      </div>
+      <div class="crate-empty" id="crate-empty" hidden></div>
+    </section>
+  </main>
+
+  <aside class="downloads" id="downloads" hidden aria-label="Downloads">
+    <header class="downloads-head">
+      <h2>Downloads</h2>
+      <button class="link-button" id="clear-downloads" type="button">Clear finished</button>
+      <button class="icon-button small" id="hide-downloads" type="button" aria-label="Hide downloads">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+    <ol class="download-list" id="download-list"></ol>
+  </aside>
+
+  <aside class="yt-panel" id="yt-panel" hidden aria-label="YouTube preview">
+    <div class="yt-frame" id="yt-frame"></div>
+    <div class="yt-foot">
+      <span>Previews play in YouTube's own player.</span>
+      <button class="link-button" id="yt-close" type="button">Close</button>
+    </div>
+  </aside>
+
+  <footer class="deck" id="deck">
+    <div class="platter" aria-hidden="true">
+      <div class="disc" id="disc"><div class="label" id="disc-label"><span id="disc-text"></span></div></div>
+    </div>
+    <button class="play-button" id="play-toggle" type="button" aria-label="Play" disabled>
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" id="play-icon"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+    </button>
+    <div class="now">
+      <p class="now-title" id="now-title">Nothing cued</p>
+      <p class="now-artist" id="now-artist">Press play on any track to preview it</p>
+    </div>
+    <div class="scrub">
+      <span class="time" id="time-current">0:00</span>
+      <div class="wave-wrap">
+        <canvas class="waveform" id="waveform" role="slider" tabindex="0" aria-label="Playback position"
+                aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00"></canvas>
+        <span class="scrub-note" id="scrub-note" hidden>Playing in the YouTube player</span>
+      </div>
+      <span class="time" id="time-total">0:00</span>
+    </div>
+    <label class="volume" title="Volume">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volume">
+    </label>
+  </footer>
+
+  <audio id="audio" preload="none"></audio>
+
+  <dialog class="sheet" id="settings-dialog" aria-labelledby="settings-title">
+    <form id="settings-form" method="dialog">
+      <h2 id="settings-title">Settings</h2>
+      <label class="field">
+        <span class="field-label">Library folder</span>
+        <input name="library_dir" type="text" required spellcheck="false">
+        <small>Downloads land here. Point rekordbox, Serato, Traktor or Mixxx at this folder.</small>
+      </label>
+      <label class="field">
+        <span class="field-label">Jamendo client ID</span>
+        <input name="jamendo_client_id" type="text" autocomplete="off" spellcheck="false" placeholder="Paste your client ID">
+        <small>Free: create an app at <a href="https://devportal.jamendo.com" target="_blank" rel="noopener noreferrer">devportal.jamendo.com</a> and copy its client ID.</small>
+      </label>
+      <label class="field">
+        <span class="field-label">YouTube sign-in</span>
+        <select name="youtube_cookies_browser"></select>
+        <small>Only needed when YouTube asks for a sign-in check, or for age-restricted videos.</small>
+      </label>
+      <label class="check"><input type="checkbox" name="prefer_lossless"> Prefer FLAC when Jamendo or the Internet Archive offers it</label>
+      <label class="check"><input type="checkbox" name="auto_analyze"> Detect BPM and key after each download</label>
+      <section class="helpers" aria-labelledby="helpers-title">
+        <h3 id="helpers-title">Helpers</h3>
+        <ul id="helper-list"></ul>
+      </section>
+      <p class="form-error" id="settings-error" role="alert" hidden></p>
+      <div class="sheet-actions">
+        <button class="button" type="submit" value="cancel" formnovalidate>Cancel</button>
+        <button class="button primary" type="submit" value="save">Save settings</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+  <script type="module" src="/static/app.js?v=__VERSION__"></script>
+</body>
+</html>

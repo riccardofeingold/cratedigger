@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crate-digger"
+version = "1.0.0"
+description = "Search YouTube, Jamendo and Internet Archive netlabels, preview tracks and build a BPM/key-tagged DJ crate."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.0",
+    "requests>=2.31",
+    "numpy>=1.24",
+    "mutagen>=1.47",
+    "imageio-ffmpeg>=0.5",
+    "yt-dlp[default]>=2025.11.12",
+]
+
+[project.scripts]
+cratedigger = "cratedigger.app:main"
+
+[tool.setuptools]
+packages = ["cratedigger", "cratedigger.sources"]
+
+[tool.setuptools.package-data]
+cratedigger = ["static/*.html", "static/*.css", "static/*.js", "static/*.svg", "static/fonts/*"]
